@@ -555,7 +555,6 @@ body.dark-mode .category-title {
     header {
         flex-direction: column;
         align-items: stretch;
-        gap: 1.5rem;
         padding: 1.5rem;
     }
 
@@ -613,20 +612,20 @@ body.dark-mode .category-title {
 }
 
 .category-nav {
-    display: flex;
-    gap: 0.5rem;
+    display: flex;  
     justify-content: center;
-    flex-wrap: wrap;
+
 }
 
 .category-nav-link {
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-light);
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 50px;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border: 1px solid #647d9169;
 }
 
 .category-nav-link:hover {
