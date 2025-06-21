@@ -1,20 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
     const faqContainer = document.getElementById('faq-container');
+    const categoryNav = document.getElementById('category-nav');
     const themeToggleButton = document.getElementById('theme-toggle');
     const searchBar = document.getElementById('search-bar');
     const toTopBtn = document.getElementById('to-top-btn');
     const body = document.body;
 
     // Load and display FAQs
-    fetch('faq.json')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(faq => {
+    Promise.all([
+        fetch('official_faqs.json').then(response => response.json()),
+        fetch('student_faqs.json').then(response => response.json())
+    ])
+    .then(([officialFaqs, studentFaqs]) => {
+        const data = [...officialFaqs, ...studentFaqs];
+        const faqsByCategory = data.reduce((acc, faq) => {
+            const { category } = faq;
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push(faq);
+            return acc;
+        }, {});
+
+        for (const category in faqsByCategory) {
+            const categoryId = 'category-' + category.replace(/[^\w\s]/gi, '').replace(/\s+/g, '-').toLowerCase();
+            const navLink = document.createElement('a');
+            navLink.href = `#${categoryId}`;
+            navLink.textContent = category;
+            navLink.classList.add('category-nav-link');
+            navLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById(categoryId)?.scrollIntoView({ behavior: 'smooth' });
+            });
+            categoryNav.appendChild(navLink);
+        }
+
+        for (const category in faqsByCategory) {
+            const categoryId = 'category-' + category.replace(/[^\w\s]/gi, '').replace(/\s+/g, '-').toLowerCase();
+            const categoryContainer = document.createElement('div');
+            categoryContainer.classList.add('faq-category');
+            categoryContainer.id = categoryId;
+            
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.classList.add('category-title');
+            categoryTitle.textContent = category;
+            categoryContainer.appendChild(categoryTitle);
+
+            faqsByCategory[category].forEach(faq => {
                 const faqItem = document.createElement('div');
                 faqItem.classList.add('faq-item');
-                // Store original text on the element for easy searching
                 faqItem.dataset.question = faq.question.toLowerCase();
                 faqItem.dataset.answer = faq.answer.toLowerCase();
+                faqItem.dataset.category = faq.category.toLowerCase();
 
                 const answerText = faq.answer
                     .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')
@@ -25,37 +62,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="faq-answer">${answerText}</div>
                 `;
 
-                faqContainer.appendChild(faqItem);
-                
+                categoryContainer.appendChild(faqItem);
+
                 const question = faqItem.querySelector('.faq-question');
                 question.addEventListener('click', () => {
                     const wasActive = faqItem.classList.contains('active');
-
-                    // Close all other FAQ items
-                    faqContainer.querySelectorAll('.faq-item').forEach(item => {
+                    
+                    document.querySelectorAll('.faq-item.active').forEach(item => {
                         item.classList.remove('active');
                     });
-
-                    // If the item wasn't already active, open it
+                    
                     if (!wasActive) {
                         faqItem.classList.add('active');
                     }
                 });
             });
-
-        })
-        .catch(error => console.error('Error fetching FAQs:', error));
+            faqContainer.appendChild(categoryContainer);
+        }
+    })
+    .catch(error => console.error('Error fetching FAQs:', error));
     
     // Search functionality
     searchBar.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const allFaqItems = faqContainer.querySelectorAll('.faq-item');
+        const allFaqItems = document.querySelectorAll('.faq-item');
+        const allCategoryTitles = document.querySelectorAll('.category-title');
+
+        let visibleCategories = new Set();
 
         allFaqItems.forEach(item => {
             const questionText = item.dataset.question;
             const answerText = item.dataset.answer;
+            const categoryText = item.dataset.category;
+            
             const isVisible = questionText.includes(searchTerm) || answerText.includes(searchTerm);
             item.style.display = isVisible ? 'block' : 'none';
+
+            if (isVisible) {
+                visibleCategories.add(categoryText);
+            }
+        });
+
+        allCategoryTitles.forEach(title => {
+            const category = title.textContent.toLowerCase();
+            const isVisible = visibleCategories.has(category);
+            title.style.display = isVisible ? 'block' : 'none';
         });
     });
     
