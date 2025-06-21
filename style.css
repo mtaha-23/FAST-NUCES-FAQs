@@ -231,10 +231,6 @@ body.dark-mode #to-top-btn {
     animation: fadeInRight 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
 }
 
-.theme-switcher {
-    /* animation has been moved to .header-actions */
-}
-
 @keyframes fadeInRight {
     from {
         opacity: 0;
