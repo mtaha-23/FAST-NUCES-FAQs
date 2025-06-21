@@ -1,4 +1,4 @@
-# FAST NUCES Admission FAQs
+# [FAST NUCES Admission FAQs](https://mtaha-23.github.io/FAST-NUCES-FAQs)
 
 A simple, modern, and responsive FAQ website for FAST NUCES admissions. Built with HTML, CSS, and vanilla JavaScript.
 
